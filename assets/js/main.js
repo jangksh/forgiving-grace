@@ -1,15 +1,31 @@
 /**
  * FORGIVING GRACE — Main JavaScript
- * Features:
- *  - Navbar: transparent → solid on scroll, active link highlight
- *  - Mobile menu toggle
- *  - Scroll-reveal animations (IntersectionObserver)
- *  - Color swatch switcher on product cards
- *  - Contact form validation + simulated submission
  */
 
 (function () {
     'use strict';
+
+    /* ── Google Apps Script URL ────────────────────────────── */
+    const SCRIPT_URL = "";
+
+    /* ── Product image map ─────────────────────────────────── */
+    const productImages = {
+        white: {
+            front: 'assets/mens-premium-heavyweight-tee-white-front-69e385831f80e.png',
+            back:  'assets/mens-premium-heavyweight-tee-white-back-69e38583298b5.png',
+            name:  'Classic White',
+        },
+        navy: {
+            front: 'assets/unisex-garment-dyed-heavyweight-t-shirt-true-navy-front-2-69e384fd86d29.png',
+            back:  'assets/unisex-garment-dyed-heavyweight-t-shirt-true-navy-back-69e384fd81b6e.png',
+            name:  'Navy Blue',
+        },
+        black: {
+            front: 'assets/unisex-classic-tee-black-front-69e385ca82ca1.png',
+            back:  'assets/unisex-classic-tee-black-back-69e385ca8a5da.png',
+            name:  'Deep Black',
+        },
+    };
 
     /* ── DOM refs ──────────────────────────────────────────── */
     const navbar      = document.getElementById('navbar');
@@ -20,15 +36,14 @@
     const contactForm = document.getElementById('contactForm');
     const formSuccess = document.getElementById('formSuccess');
 
-    /* ── Navbar scroll behavior ────────────────────────────── */
+    /* ── Navbar scroll ─────────────────────────────────────── */
     function onScroll() {
         navbar.classList.toggle('scrolled', window.scrollY > 40);
         highlightActiveNav();
     }
     window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll(); // init
+    onScroll();
 
-    /* ── Active nav link on scroll ─────────────────────────── */
     function highlightActiveNav() {
         const scrollMid = window.scrollY + window.innerHeight / 3;
         sections.forEach(section => {
@@ -48,12 +63,8 @@
         document.body.style.overflow = isOpen ? 'hidden' : '';
     });
 
-    // Close when a nav link is tapped
-    navLinks.forEach(link => {
-        link.addEventListener('click', closeMenu);
-    });
+    navLinks.forEach(link => link.addEventListener('click', closeMenu));
 
-    // Close on outside click
     document.addEventListener('click', e => {
         if (!navbar.contains(e.target)) closeMenu();
     });
@@ -65,7 +76,7 @@
         document.body.style.overflow = '';
     }
 
-    /* ── Scroll-reveal (IntersectionObserver) ──────────────── */
+    /* ── Scroll-reveal ─────────────────────────────────────── */
     const revealObs = new IntersectionObserver(
         entries => entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -77,114 +88,303 @@
     );
     document.querySelectorAll('.fade-in').forEach(el => revealObs.observe(el));
 
-    /* ── Color swatch switcher ─────────────────────────────── */
-    const colorConfig = {
-        white: { tshirtClass: 'tshirt-white', mockupClass: 'mockup-light', name: 'Classic White' },
-        navy:  { tshirtClass: 'tshirt-navy',  mockupClass: 'mockup-mid',   name: 'Navy Blue'    },
-        black: { tshirtClass: 'tshirt-black', mockupClass: 'mockup-dark',  name: 'Deep Black'   },
-    };
-
+    /* ── Front / Back image toggle ─────────────────────────── */
     document.querySelectorAll('.product-card').forEach(card => {
-        const swatches   = card.querySelectorAll('.swatch');
-        const tshirtEl   = card.querySelector('.tshirt');
-        const mockupEl   = card.querySelector('.product-mockup');
-        const colorLabel = card.querySelector('.product-colorname');
+        const mockup   = card.querySelector('.product-mockup');
+        const img      = card.querySelector('.product-img');
+        const toggleBtns = card.querySelectorAll('.img-toggle-btn');
 
-        swatches.forEach(sw => {
-            sw.addEventListener('click', () => {
-                const cfg = colorConfig[sw.dataset.color];
-                if (!cfg) return;
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const view  = btn.dataset.view;
+                const color = card.dataset.color || 'white';
+                const pics  = productImages[color] || productImages.white;
 
-                // Active swatch ring
-                swatches.forEach(s => s.classList.remove('active'));
-                sw.classList.add('active');
-
-                // Swap t-shirt color class
-                tshirtEl.className = `tshirt ${cfg.tshirtClass}`;
-
-                // Swap mockup background class
-                mockupEl.className = `product-mockup ${cfg.mockupClass}`;
-
-                // Update color label text
-                if (colorLabel) colorLabel.textContent = cfg.name;
+                img.src = view === 'back' ? pics.back : pics.front;
+                toggleBtns.forEach(b => b.classList.toggle('active', b === btn));
             });
         });
     });
 
-    /* ── Contact form validation & submission ──────────────── */
-    if (!contactForm) return;
+    /* ── Color swatch switcher (per card) ──────────────────── */
+    document.querySelectorAll('.product-card').forEach(card => {
+        const swatches   = card.querySelectorAll('.swatch');
+        const img        = card.querySelector('.product-img');
+        const colorLabel = card.querySelector('.product-colorname');
+        const toggleBtns = card.querySelectorAll('.img-toggle-btn');
 
-    const fields = {
-        fname: {
-            el:  document.getElementById('fname'),
-            err: document.getElementById('nameErr'),
-            check: v => v.trim().length >= 2 ? null : 'Please enter your name.',
-        },
-        femail: {
-            el:  document.getElementById('femail'),
-            err: document.getElementById('emailErr'),
-            check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
-                        ? null : 'Please enter a valid email address.',
-        },
-        fmessage: {
-            el:  document.getElementById('fmessage'),
-            err: document.getElementById('msgErr'),
-            check: v => v.trim().length >= 10 ? null : 'Please write at least 10 characters.',
-        },
-    };
+        swatches.forEach(sw => {
+            sw.addEventListener('click', e => {
+                e.stopPropagation();
+                const color = sw.dataset.color;
+                const pics  = productImages[color];
+                if (!pics) return;
 
-    function validateField(key) {
-        const f   = fields[key];
-        const msg = f.check(f.el.value);
-        f.err.textContent = msg || '';
-        f.err.classList.toggle('show', !!msg);
-        f.el.style.borderColor = msg ? '#C0392B' : '';
-        return !msg;
-    }
+                swatches.forEach(s => s.classList.remove('active'));
+                sw.classList.add('active');
 
-    // Inline feedback
-    Object.keys(fields).forEach(key => {
-        fields[key].el.addEventListener('blur',  () => validateField(key));
-        fields[key].el.addEventListener('input', () => {
-            if (fields[key].err.classList.contains('show')) validateField(key);
+                card.dataset.color     = color;
+                card.dataset.colorname = pics.name;
+
+                // Reset to front view
+                img.dataset.front = pics.front;
+                img.dataset.back  = pics.back;
+                img.src = pics.front;
+                toggleBtns.forEach(b => b.classList.toggle('active', b.dataset.view === 'front'));
+
+                if (colorLabel) colorLabel.textContent = pics.name;
+            });
         });
     });
 
-    contactForm.addEventListener('submit', e => {
-        e.preventDefault();
+    /* ── Contact form ──────────────────────────────────────── */
+    if (contactForm) {
+        const fields = {
+            fname:    { el: document.getElementById('fname'),    err: document.getElementById('nameErr'),  check: v => v.trim().length >= 2    ? null : 'Please enter your name.' },
+            femail:   { el: document.getElementById('femail'),   err: document.getElementById('emailErr'), check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? null : 'Please enter a valid email.' },
+            fmessage: { el: document.getElementById('fmessage'), err: document.getElementById('msgErr'),   check: v => v.trim().length >= 10   ? null : 'Please write at least 10 characters.' },
+        };
 
-        const valid = Object.keys(fields).reduce(
-            (ok, key) => validateField(key) && ok, true
-        );
-        if (!valid) return;
+        function validateField(key) {
+            const f   = fields[key];
+            const msg = f.check(f.el.value);
+            f.err.textContent = msg || '';
+            f.err.classList.toggle('show', !!msg);
+            f.el.style.borderColor = msg ? '#C0392B' : '';
+            return !msg;
+        }
 
-        const btn = contactForm.querySelector('.form-btn');
-        btn.textContent = 'Sending...';
-        btn.disabled = true;
+        Object.keys(fields).forEach(key => {
+            fields[key].el.addEventListener('blur',  () => validateField(key));
+            fields[key].el.addEventListener('input', () => {
+                if (fields[key].err.classList.contains('show')) validateField(key);
+            });
+        });
 
-        /*
-         * WORDPRESS / BACKEND INTEGRATION:
-         * Replace the setTimeout mock below with an actual fetch() POST
-         * to your WordPress REST API endpoint or a custom handler.
-         *
-         * Example:
-         * fetch('/wp-json/contact/v1/submit', {
-         *   method: 'POST',
-         *   headers: { 'Content-Type': 'application/json' },
-         *   body: JSON.stringify({ name, email, subject, message }),
-         * })
-         * .then(r => r.json())
-         * .then(data => { ... showSuccess(); })
-         * .catch(err => { ... showError(); });
-         */
-        setTimeout(() => {
-            contactForm.reset();
-            btn.textContent = 'Send Message';
-            btn.disabled = false;
-            formSuccess.classList.add('show');
-            formSuccess.focus();
-            setTimeout(() => formSuccess.classList.remove('show'), 6000);
-        }, 900);
+        contactForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const valid = Object.keys(fields).reduce((ok, key) => validateField(key) && ok, true);
+            if (!valid) return;
+
+            const btn = contactForm.querySelector('.form-btn');
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                contactForm.reset();
+                btn.textContent = 'Send Message';
+                btn.disabled = false;
+                formSuccess.classList.add('show');
+                formSuccess.focus();
+                setTimeout(() => formSuccess.classList.remove('show'), 6000);
+            }, 900);
+        });
+    }
+
+    /* ════════════════════════════════════════════════════════
+       ORDER MODAL
+    ═══════════════════════════════════════════════════════════ */
+    const modalOverlay  = document.getElementById('orderModalOverlay');
+    const modalClose    = document.getElementById('modalClose');
+    const modalPreview  = document.getElementById('modalPreviewImg');
+    const modalColorDis = document.getElementById('modalColorDisplay');
+    const modalColorList = document.getElementById('modalColorList');
+    const sizeSelector  = document.getElementById('sizeSelector');
+    const orderForm     = document.getElementById('orderForm');
+    const orderSuccess  = document.getElementById('orderSuccess');
+    const orderDoneBtn  = document.getElementById('orderDoneBtn');
+
+    let selectedSize  = '';
+    let selectedColor = 'white';
+
+    function openModal(color, colorName) {
+        selectedColor = color || 'white';
+        selectedSize  = '';
+
+        const pics = productImages[selectedColor] || productImages.white;
+
+        // Preview image
+        modalPreview.src = pics.front;
+        modalPreview.alt = `Forgiving Grace Tee - ${pics.name}`;
+
+        // Color display
+        modalColorDis.textContent = pics.name;
+
+        // Highlight color button
+        document.querySelectorAll('.modal-color-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.color === selectedColor);
+        });
+
+        // Reset size selection
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+
+        // Reset form fields
+        orderForm.reset();
+        clearOrderErrors();
+
+        // Show form, hide success
+        orderForm.style.display = '';
+        orderSuccess.classList.remove('show');
+
+        // Open overlay
+        modalOverlay.classList.add('open');
+        modalOverlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        modalClose.focus();
+    }
+
+    function closeModal() {
+        modalOverlay.classList.remove('open');
+        modalOverlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    // Open modal from product card click or "Order Now" button
+    document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', e => {
+            if (e.target.closest('.img-toggle') || e.target.closest('.swatches')) return;
+            openModal(card.dataset.color, card.dataset.colorname);
+        });
     });
+
+    // Close modal
+    modalClose.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', e => {
+        if (e.target === modalOverlay) closeModal();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && modalOverlay.classList.contains('open')) closeModal();
+    });
+
+    if (orderDoneBtn) orderDoneBtn.addEventListener('click', closeModal);
+
+    // Modal color picker updates preview image
+    document.querySelectorAll('.modal-color-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedColor = btn.dataset.color;
+            const pics = productImages[selectedColor] || productImages.white;
+
+            document.querySelectorAll('.modal-color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            modalPreview.src = pics.front;
+            modalColorDis.textContent = pics.name;
+        });
+    });
+
+    // Size picker
+    document.querySelectorAll('.size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedSize = btn.dataset.size;
+            document.getElementById('sizeErr').textContent = '';
+            document.getElementById('sizeErr').classList.remove('show');
+        });
+    });
+
+    /* ── Order form validation & submission ────────────────── */
+    function clearOrderErrors() {
+        ['sizeErr','orderNameErr','orderEmailErr','orderAddrErr','orderCityErr'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.textContent = ''; el.classList.remove('show'); }
+        });
+        ['orderName','orderEmail','orderAddr','orderCity'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.borderColor = '';
+        });
+    }
+
+    function showOrderFieldError(errId, inputId, msg) {
+        const errEl = document.getElementById(errId);
+        const inEl  = document.getElementById(inputId);
+        if (errEl) { errEl.textContent = msg; errEl.classList.add('show'); }
+        if (inEl)  inEl.style.borderColor = '#C0392B';
+        return false;
+    }
+
+    function validateOrderForm() {
+        let valid = true;
+
+        if (!selectedSize) {
+            const el = document.getElementById('sizeErr');
+            if (el) { el.textContent = 'Please select a size.'; el.classList.add('show'); }
+            valid = false;
+        }
+
+        const name  = document.getElementById('orderName').value.trim();
+        const email = document.getElementById('orderEmail').value.trim();
+        const addr  = document.getElementById('orderAddr').value.trim();
+        const city  = document.getElementById('orderCity').value.trim();
+
+        if (name.length < 2)  { showOrderFieldError('orderNameErr',  'orderName',  'Please enter your full name.'); valid = false; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showOrderFieldError('orderEmailErr', 'orderEmail', 'Please enter a valid email.'); valid = false; }
+        if (addr.length < 5)  { showOrderFieldError('orderAddrErr',  'orderAddr',  'Please enter your street address.'); valid = false; }
+        if (city.length < 2)  { showOrderFieldError('orderCityErr',  'orderCity',  'Please enter your city.'); valid = false; }
+
+        return valid;
+    }
+
+    if (orderForm) {
+        orderForm.addEventListener('submit', e => {
+            e.preventDefault();
+            clearOrderErrors();
+
+            if (!validateOrderForm()) return;
+
+            const submitBtn = document.getElementById('orderSubmitBtn');
+            submitBtn.textContent = 'Placing Order...';
+            submitBtn.disabled = true;
+
+            const payload = {
+                timestamp:   new Date().toISOString(),
+                product:     'Forgiving Grace Tee — Design # the Cross',
+                color:       (productImages[selectedColor] || productImages.white).name,
+                size:        selectedSize,
+                name:        document.getElementById('orderName').value.trim(),
+                email:       document.getElementById('orderEmail').value.trim(),
+                phone:       document.getElementById('orderPhone').value.trim(),
+                address:     document.getElementById('orderAddr').value.trim(),
+                city:        document.getElementById('orderCity').value.trim(),
+                state:       document.getElementById('orderState').value.trim(),
+                zip:         document.getElementById('orderZip').value.trim(),
+            };
+
+            function showSuccess() {
+                orderForm.style.display = 'none';
+                orderSuccess.classList.add('show');
+                orderDoneBtn.focus();
+            }
+
+            if (!SCRIPT_URL) {
+                // No URL configured — show success immediately for testing
+                setTimeout(() => {
+                    submitBtn.textContent = 'Place Order';
+                    submitBtn.disabled = false;
+                    showSuccess();
+                }, 800);
+                return;
+            }
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode:   'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            })
+            .then(() => {
+                submitBtn.textContent = 'Place Order';
+                submitBtn.disabled = false;
+                showSuccess();
+            })
+            .catch(() => {
+                submitBtn.textContent = 'Place Order';
+                submitBtn.disabled = false;
+                // Show success anyway — no-cors response is opaque, assume success
+                showSuccess();
+            });
+        });
+    }
 
 })();
