@@ -13,6 +13,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>emailjs.init('SwZf5QDWq5Cq4M7_H');</script>
 </head>
 <body>
 
@@ -338,7 +340,10 @@
                             <button type="submit" class="btn btn-primary form-btn">Send Message</button>
 
                             <div class="form-success" id="formSuccess" role="alert" aria-live="polite">
-                                <span aria-hidden="true">✝</span> Message received. God bless you.
+                                <span aria-hidden="true">✝</span> Your message has been sent! Thank you.
+                            </div>
+                            <div class="form-error" id="formError" role="alert" aria-live="polite">
+                                Message failed to send. Please try again.
                             </div>
                         </form>
                     </div>

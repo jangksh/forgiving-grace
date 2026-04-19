@@ -140,6 +140,8 @@
 
     /* ── Contact form ──────────────────────────────────────── */
     if (contactForm) {
+        const formError = document.getElementById('formError');
+
         const fields = {
             fname:    { el: document.getElementById('fname'),    err: document.getElementById('nameErr'),  check: v => v.trim().length >= 2    ? null : 'Please enter your name.' },
             femail:   { el: document.getElementById('femail'),   err: document.getElementById('emailErr'), check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? null : 'Please enter a valid email.' },
@@ -170,15 +172,29 @@
             const btn = contactForm.querySelector('.form-btn');
             btn.textContent = 'Sending...';
             btn.disabled = true;
+            formSuccess.classList.remove('show');
+            formError.classList.remove('show');
 
-            setTimeout(() => {
+            emailjs.send('service_lrxnpf4', 'template_z57echr', {
+                name:    document.getElementById('fname').value.trim(),
+                email:   document.getElementById('femail').value.trim(),
+                title:   document.getElementById('fsubject').value,
+                message: document.getElementById('fmessage').value.trim(),
+            })
+            .then(() => {
                 contactForm.reset();
                 btn.textContent = 'Send Message';
                 btn.disabled = false;
                 formSuccess.classList.add('show');
                 formSuccess.focus();
                 setTimeout(() => formSuccess.classList.remove('show'), 6000);
-            }, 900);
+            })
+            .catch(() => {
+                btn.textContent = 'Send Message';
+                btn.disabled = false;
+                formError.classList.add('show');
+                setTimeout(() => formError.classList.remove('show'), 6000);
+            });
         });
     }
 

@@ -773,6 +773,16 @@ ul    { list-style: none; }
 }
 .form-success.show { display: flex; }
 
+.form-error {
+    display: none;
+    padding: 15px 18px;
+    background: rgba(192,57,43,0.07);
+    border-left: 3px solid #C0392B;
+    font-size: 0.88rem;
+    color: #C0392B;
+}
+.form-error.show { display: block; }
+
 /* ════════════════════════════════════════════════════════════
    FOOTER
    ════════════════════════════════════════════════════════════ */
