@@ -25,6 +25,16 @@
             back:  'assets/unisex-classic-tee-black-back-69e385ca8a5da.png',
             name:  'Deep Black',
         },
+        'hoodie-black': {
+            front: 'assets/unisex-heavy-blend-zip-hoodie-black-front-69e568909bd5d.png',
+            back:  'assets/unisex-heavy-blend-zip-hoodie-black-back-69e568909d1dd.png',
+            name:  'Black',
+        },
+        'sweatshirt-white': {
+            front: 'assets/unisex-oversized-heavyweight-sweatshirt-white-left-front-69e568c2546de.png',
+            back:  'assets/unisex-oversized-heavyweight-sweatshirt-white-back-69e568c254bb5.png',
+            name:  'White',
+        },
     };
 
     /* ── DOM refs ──────────────────────────────────────────── */
@@ -220,21 +230,24 @@
     const orderSuccess  = document.getElementById('orderSuccess');
     const orderDoneBtn  = document.getElementById('orderDoneBtn');
 
-    let selectedSize  = '';
-    let selectedColor = 'white';
-    let selectedQty   = 1;
+    let selectedSize    = '';
+    let selectedColor   = 'white';
+    let selectedQty     = 1;
+    let selectedProduct = 'Forgiving Grace Tee';
 
-    function openModal(color, colorName) {
-        selectedColor = color || 'white';
-        selectedSize  = '';
+    function openModal(color, colorName, productName) {
+        selectedColor   = color || 'white';
+        selectedSize    = '';
+        selectedProduct = productName || 'Forgiving Grace Tee';
 
         const pics = productImages[selectedColor] || productImages.white;
 
         // Preview image
         modalPreview.src = pics.front;
-        modalPreview.alt = `Forgiving Grace Tee - ${pics.name}`;
+        modalPreview.alt = `${selectedProduct} - ${pics.name}`;
 
-        // Color display
+        // Product title & color display
+        document.getElementById('modalTitle').textContent = selectedProduct;
         modalColorDis.textContent = pics.name;
 
         // Highlight color button
@@ -275,7 +288,7 @@
     document.querySelectorAll('.product-card').forEach(card => {
         card.addEventListener('click', e => {
             if (e.target.closest('.img-toggle') || e.target.closest('.swatches')) return;
-            openModal(card.dataset.color, card.dataset.colorname);
+            openModal(card.dataset.color, card.dataset.colorname, card.dataset.product);
         });
     });
 
@@ -390,7 +403,7 @@
 
             const payload = {
                 timestamp:   new Date().toISOString(),
-                product:     'Forgiving Grace Tee — Design # the Cross',
+                product:     `${selectedProduct} — Design # the Cross`,
                 color:       (productImages[selectedColor] || productImages.white).name,
                 size:        selectedSize,
                 quantity:    selectedQty,
