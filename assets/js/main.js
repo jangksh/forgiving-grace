@@ -376,7 +376,7 @@
             function showOrderError() {
                 const errEl = document.getElementById('orderSubmitErr');
                 if (errEl) {
-                    errEl.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+                    errEl.textContent = 'An error occurred. Please try again.';
                     errEl.classList.add('show');
                 }
                 submitBtn.textContent = 'Place Order';
