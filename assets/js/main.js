@@ -213,6 +213,7 @@
 
     let selectedSize  = '';
     let selectedColor = 'white';
+    let selectedQty   = 1;
 
     function openModal(color, colorName) {
         selectedColor = color || 'white';
@@ -234,6 +235,11 @@
 
         // Reset size selection
         document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+
+        // Reset quantity
+        selectedQty = 1;
+        const qtyDisplay = document.getElementById('qtyDisplay');
+        if (qtyDisplay) qtyDisplay.textContent = '1';
 
         // Reset form fields
         orderForm.reset();
@@ -288,6 +294,26 @@
             modalColorDis.textContent = pics.name;
         });
     });
+
+    // Quantity picker
+    const qtyMinus   = document.getElementById('qtyMinus');
+    const qtyPlus    = document.getElementById('qtyPlus');
+    const qtyDisplay = document.getElementById('qtyDisplay');
+
+    if (qtyMinus && qtyPlus) {
+        qtyMinus.addEventListener('click', () => {
+            if (selectedQty > 1) {
+                selectedQty--;
+                qtyDisplay.textContent = selectedQty;
+            }
+        });
+        qtyPlus.addEventListener('click', () => {
+            if (selectedQty < 10) {
+                selectedQty++;
+                qtyDisplay.textContent = selectedQty;
+            }
+        });
+    }
 
     // Size picker
     document.querySelectorAll('.size-btn').forEach(btn => {
@@ -358,6 +384,7 @@
                 product:     'Forgiving Grace Tee — Design # the Cross',
                 color:       (productImages[selectedColor] || productImages.white).name,
                 size:        selectedSize,
+                quantity:    selectedQty,
                 name:        document.getElementById('orderName').value.trim(),
                 email:       document.getElementById('orderEmail').value.trim(),
                 phone:       document.getElementById('orderPhone').value.trim(),

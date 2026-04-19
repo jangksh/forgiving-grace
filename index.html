@@ -449,6 +449,16 @@
                     <span class="field-error" id="sizeErr"></span>
                 </div>
 
+                <!-- Quantity selector -->
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn" id="qtyMinus">−</button>
+                        <span class="qty-display" id="qtyDisplay">1</span>
+                        <button type="button" class="qty-btn" id="qtyPlus">+</button>
+                    </div>
+                </div>
+
                 <!-- Color selector in modal -->
                 <div class="form-group">
                     <label>Color <span class="req-star">*</span></label>
@@ -517,7 +527,7 @@
 
             <!-- Success screen -->
             <div class="order-success" id="orderSuccess">
-                <div class="success-cross">✝</div>
+                <img src="assets/FG logo.png" alt="Forgiving Grace" class="success-logo">
                 <h3>Order Placed!</h3>
                 <p>Your order has been placed successfully! We will contact you soon.</p>
                 <p class="success-verse">"God Forgives You" — Genesis 1:28</p>
