@@ -506,16 +506,17 @@
                     <input type="text" id="orderZip" placeholder="90001" autocomplete="postal-code">
                 </div>
 
+                <span class="field-error" id="orderSubmitErr" style="text-align:center; margin-top:4px;"></span>
                 <button type="submit" class="btn btn-primary btn-full" id="orderSubmitBtn">Place Order</button>
             </form>
 
             <!-- Success screen -->
             <div class="order-success" id="orderSuccess">
                 <div class="success-cross">✝</div>
-                <h3>Order Received!</h3>
-                <p>Thank you for your order. We'll contact you soon to confirm the details.</p>
+                <h3>주문이 완료되었습니다!</h3>
+                <p>곧 연락드리겠습니다.</p>
                 <p class="success-verse">"God Forgives You" — Genesis 1:28</p>
-                <button type="button" class="btn btn-primary" id="orderDoneBtn">Close</button>
+                <button type="button" class="btn btn-primary" id="orderDoneBtn">닫기</button>
             </div>
         </div>
     </div>

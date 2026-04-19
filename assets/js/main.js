@@ -6,7 +6,7 @@
     'use strict';
 
     /* ── Google Apps Script URL ────────────────────────────── */
-    const SCRIPT_URL = "";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRWbmMHakgyMU4fyD5LRrkZago3HbVqVEKLWSnjiGLrNejbS25ucXPLTAffRwi-IF7/exec";
 
     /* ── Product image map ─────────────────────────────────── */
     const productImages = {
@@ -286,7 +286,7 @@
 
     /* ── Order form validation & submission ────────────────── */
     function clearOrderErrors() {
-        ['sizeErr','orderNameErr','orderEmailErr','orderAddrErr','orderCityErr'].forEach(id => {
+        ['sizeErr','orderNameErr','orderEmailErr','orderAddrErr','orderCityErr','orderSubmitErr'].forEach(id => {
             const el = document.getElementById(id);
             if (el) { el.textContent = ''; el.classList.remove('show'); }
         });
@@ -357,14 +357,14 @@
                 orderDoneBtn.focus();
             }
 
-            if (!SCRIPT_URL) {
-                // No URL configured — show success immediately for testing
-                setTimeout(() => {
-                    submitBtn.textContent = 'Place Order';
-                    submitBtn.disabled = false;
-                    showSuccess();
-                }, 800);
-                return;
+            function showOrderError() {
+                const errEl = document.getElementById('orderSubmitErr');
+                if (errEl) {
+                    errEl.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+                    errEl.classList.add('show');
+                }
+                submitBtn.textContent = 'Place Order';
+                submitBtn.disabled = false;
             }
 
             fetch(SCRIPT_URL, {
@@ -379,10 +379,7 @@
                 showSuccess();
             })
             .catch(() => {
-                submitBtn.textContent = 'Place Order';
-                submitBtn.disabled = false;
-                // Show success anyway — no-cors response is opaque, assume success
-                showSuccess();
+                showOrderError();
             });
         });
     }
