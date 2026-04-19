@@ -964,48 +964,23 @@ ul    { list-style: none; }
 }
 
 /* ════════════════════════════════════════════════════════════
-   SHARED LOGO BADGE (nav + hero)
+   LOGO IMAGES (nav + hero)
    ════════════════════════════════════════════════════════════ */
-.logo-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    background: #000000;
-    border: 1.5px solid rgba(255,255,255,0.22);
-    transition: border-color var(--tx);
-}
-.logo-badge:hover { border-color: rgba(255,255,255,0.55); }
-
-.logo-cross {
-    color: #ffffff;
-    line-height: 1;
-    font-style: normal;
-}
-.logo-fg {
-    font-family: var(--font-logo);
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    color: #ffffff;
-    line-height: 1;
-}
-
-/* Nav badge size */
-.logo-badge-nav {
-    padding: 0 14px;
+.nav-logo-img {
     height: 40px;
+    width: auto;
+    display: block;
+    object-fit: contain;
 }
-.logo-badge-nav .logo-cross { font-size: 0.85rem; }
-.logo-badge-nav .logo-fg    { font-size: 1.35rem; }
 
-/* Hero badge size */
-.logo-badge-hero {
-    padding: 12px 22px;
+.hero-logo-img {
+    height: 90px;
+    width: auto;
+    display: block;
+    object-fit: contain;
 }
-.logo-badge-hero .logo-cross { font-size: 1.35rem; }
-.logo-badge-hero .logo-fg    { font-size: 2.4rem; }
 
-/* Hero emblem wrapper — just centers the badge */
+/* Hero emblem wrapper */
 .hero-emblem {
     display: flex;
     align-items: center;
