@@ -175,13 +175,18 @@
             formSuccess.classList.remove('show');
             formError.classList.remove('show');
 
-            emailjs.send('service_lrxnpf4', 'template_z57echr', {
-                name:    document.getElementById('fname').value.trim(),
-                email:   document.getElementById('femail').value.trim(),
-                title:   document.getElementById('fsubject').value,
-                message: document.getElementById('fmessage').value.trim(),
-            })
-            .then(() => {
+            const templateParams = {
+                from_name: document.getElementById('fname').value.trim(),
+                reply_to:  document.getElementById('femail').value.trim(),
+                subject:   document.getElementById('fsubject').value,
+                message:   document.getElementById('fmessage').value.trim(),
+            };
+
+            console.log('[EmailJS] Sending with params:', templateParams);
+
+            emailjs.send('service_lrxnpf4', 'template_z57echr', templateParams)
+            .then(response => {
+                console.log('[EmailJS] Success:', response.status, response.text);
                 contactForm.reset();
                 btn.textContent = 'Send Message';
                 btn.disabled = false;
@@ -189,7 +194,8 @@
                 formSuccess.focus();
                 setTimeout(() => formSuccess.classList.remove('show'), 6000);
             })
-            .catch(() => {
+            .catch(err => {
+                console.error('[EmailJS] Error:', err);
                 btn.textContent = 'Send Message';
                 btn.disabled = false;
                 formError.classList.add('show');
