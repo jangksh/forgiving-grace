@@ -561,6 +561,13 @@ ul    { list-style: none; }
     line-height: 1.72;
     margin-bottom: 14px;
 }
+.product-price {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--black);
+    letter-spacing: 0.02em;
+    margin-bottom: 12px;
+}
 
 /* Tags */
 .product-tags {

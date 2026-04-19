@@ -11,13 +11,13 @@
     /* ── Product image map ─────────────────────────────────── */
     const productImages = {
         white: {
-            front: 'assets/mens-premium-heavyweight-tee-white-front-69e385831f80e.png',
-            back:  'assets/mens-premium-heavyweight-tee-white-back-69e38583298b5.png',
+            front: 'assets/mens-premium-heavyweight-tee-white-front-69e3858333d27.png',
+            back:  'assets/mens-premium-heavyweight-tee-white-back-69e385832c0f6.png',
             name:  'Classic White',
         },
         navy: {
             front: 'assets/unisex-garment-dyed-heavyweight-t-shirt-true-navy-front-2-69e384fd86d29.png',
-            back:  'assets/unisex-garment-dyed-heavyweight-t-shirt-true-navy-back-69e384fd81b6e.png',
+            back:  'assets/unisex-garment-dyed-heavyweight-t-shirt-true-navy-back-69e384fd87581.png',
             name:  'Navy Blue',
         },
         black: {
