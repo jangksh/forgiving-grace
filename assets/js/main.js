@@ -176,10 +176,10 @@
             formError.classList.remove('show');
 
             const templateParams = {
-                from_name: document.getElementById('fname').value.trim(),
-                reply_to:  document.getElementById('femail').value.trim(),
-                subject:   document.getElementById('fsubject').value,
-                message:   document.getElementById('fmessage').value.trim(),
+                name:    document.getElementById('fname').value.trim(),
+                email:   document.getElementById('femail').value.trim(),
+                title:   document.getElementById('fsubject').value,
+                message: document.getElementById('fmessage').value.trim(),
             };
 
             console.log('[EmailJS] Sending with params:', templateParams);
