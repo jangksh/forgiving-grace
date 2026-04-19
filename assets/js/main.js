@@ -175,27 +175,30 @@
             formSuccess.classList.remove('show');
             formError.classList.remove('show');
 
-            const templateParams = {
-                name:    document.getElementById('fname').value.trim(),
-                email:   document.getElementById('femail').value.trim(),
-                title:   document.getElementById('fsubject').value,
-                message: document.getElementById('fmessage').value.trim(),
-            };
-
-            console.log('[EmailJS] Sending with params:', templateParams);
-
-            emailjs.send('service_lrxnpf4', 'template_z57echr', templateParams)
+            fetch('https://formspree.io/f/fgforgivinggrace@gmail.com', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({
+                    name:    document.getElementById('fname').value.trim(),
+                    email:   document.getElementById('femail').value.trim(),
+                    subject: document.getElementById('fsubject').value,
+                    message: document.getElementById('fmessage').value.trim(),
+                }),
+            })
             .then(response => {
-                console.log('[EmailJS] Success:', response.status, response.text);
-                contactForm.reset();
                 btn.textContent = 'Send Message';
                 btn.disabled = false;
-                formSuccess.classList.add('show');
-                formSuccess.focus();
-                setTimeout(() => formSuccess.classList.remove('show'), 6000);
+                if (response.ok) {
+                    contactForm.reset();
+                    formSuccess.classList.add('show');
+                    formSuccess.focus();
+                    setTimeout(() => formSuccess.classList.remove('show'), 6000);
+                } else {
+                    formError.classList.add('show');
+                    setTimeout(() => formError.classList.remove('show'), 6000);
+                }
             })
-            .catch(err => {
-                console.error('[EmailJS] Error:', err);
+            .catch(() => {
                 btn.textContent = 'Send Message';
                 btn.disabled = false;
                 formError.classList.add('show');
