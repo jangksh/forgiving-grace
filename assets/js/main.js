@@ -1,12 +1,19 @@
 /**
  * FORGIVING GRACE — Main JavaScript
+ * 설정값은 모두 assets/js/config.js 에 있습니다.
  */
 
 (function () {
     'use strict';
 
-    /* ── Google Apps Script URL ────────────────────────────── */
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRWbmMHakgyMU4fyD5LRrkZago3HbVqVEKLWSnjiGLrNejbS25ucXPLTAffRwi-IF7/exec";
+    const CFG     = window.FG_CONFIG || {};
+    const BIZ     = CFG.business || {};
+    const FORMS   = CFG.forms    || {};
+    const PAY     = CFG.payment  || {};
+    const CATALOG = CFG.products || {};
+    const track   = function (name, params) {
+        if (typeof window.fgTrack === 'function') window.fgTrack(name, params);
+    };
 
     /* ── Product image map ─────────────────────────────────── */
     const productImages = {
@@ -37,6 +44,24 @@
         },
     };
 
+    /* 이미지 + 카탈로그(가격/SKU/결제링크)를 하나로 합쳐서 반환 */
+    function productMeta(key) {
+        const img = productImages[key] || productImages.white;
+        const cat = CATALOG[key] || {};
+        return {
+            key:         key,
+            front:       img.front,
+            back:        img.back,
+            colorName:   cat.color || img.name,
+            productName: cat.name  || 'Forgiving Grace Tee',
+            price:       typeof cat.price === 'number' ? cat.price : 0,
+            sku:         cat.sku || '',
+            paymentLink: cat.paymentLink || '',
+        };
+    }
+
+    const money = n => '$' + Number(n || 0).toFixed(2);
+
     /* ── DOM refs ──────────────────────────────────────────── */
     const navbar      = document.getElementById('navbar');
     const navToggle   = document.getElementById('navToggle');
@@ -45,6 +70,21 @@
     const sections    = document.querySelectorAll('section[id]');
     const contactForm = document.getElementById('contactForm');
     const formSuccess = document.getElementById('formSuccess');
+
+    /* ── Footer year ───────────────────────────────────────── */
+    const yearEl = document.getElementById('footerYear');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    /* ── Social links: 설정 안 된 채널은 숨김 (빈 '#' 링크 방지) ── */
+    document.querySelectorAll('[data-social]').forEach(el => {
+        const key = el.dataset.social;
+        const url = key === 'email'
+            ? (BIZ.email ? 'mailto:' + BIZ.email : '')
+            : ((CFG.social || {})[key] || '');
+        if (!url || url === '#') { el.remove(); return; }
+        el.setAttribute('href', url);
+        el.addEventListener('click', () => track('social_click', { channel: key }));
+    });
 
     /* ── Navbar scroll ─────────────────────────────────────── */
     function onScroll() {
@@ -100,16 +140,14 @@
 
     /* ── Front / Back image toggle ─────────────────────────── */
     document.querySelectorAll('.product-card').forEach(card => {
-        const mockup   = card.querySelector('.product-mockup');
-        const img      = card.querySelector('.product-img');
+        const img        = card.querySelector('.product-img');
         const toggleBtns = card.querySelectorAll('.img-toggle-btn');
 
         toggleBtns.forEach(btn => {
             btn.addEventListener('click', e => {
                 e.stopPropagation();
-                const view  = btn.dataset.view;
-                const color = card.dataset.color || 'white';
-                const pics  = productImages[color] || productImages.white;
+                const view = btn.dataset.view;
+                const pics = productMeta(card.dataset.color || 'white');
 
                 img.src = view === 'back' ? pics.back : pics.front;
                 toggleBtns.forEach(b => b.classList.toggle('active', b === btn));
@@ -128,14 +166,14 @@
             sw.addEventListener('click', e => {
                 e.stopPropagation();
                 const color = sw.dataset.color;
-                const pics  = productImages[color];
-                if (!pics) return;
+                if (!productImages[color]) return;
+                const pics = productMeta(color);
 
                 swatches.forEach(s => s.classList.remove('active'));
                 sw.classList.add('active');
 
                 card.dataset.color     = color;
-                card.dataset.colorname = pics.name;
+                card.dataset.colorname = pics.colorName;
 
                 // Reset to front view
                 img.dataset.front = pics.front;
@@ -143,7 +181,7 @@
                 img.src = pics.front;
                 toggleBtns.forEach(b => b.classList.toggle('active', b.dataset.view === 'front'));
 
-                if (colorLabel) colorLabel.textContent = pics.name;
+                if (colorLabel) colorLabel.textContent = pics.colorName;
             });
         });
     });
@@ -151,6 +189,10 @@
     /* ── Contact form ──────────────────────────────────────── */
     if (contactForm) {
         const formError = document.getElementById('formError');
+        const endpoint  = FORMS.contactEndpoint || '';
+
+        // 엔드포인트가 있으면 native fallback 도 같은 곳으로 POST 되게 맞춰 둔다
+        if (endpoint) contactForm.setAttribute('action', endpoint);
 
         const fields = {
             fname:    { el: document.getElementById('fname'),    err: document.getElementById('nameErr'),  check: v => v.trim().length >= 2    ? null : 'Please enter your name.' },
@@ -167,6 +209,11 @@
             return !msg;
         }
 
+        function showContactError(html) {
+            formError.innerHTML = html;
+            formError.classList.add('show');
+        }
+
         Object.keys(fields).forEach(key => {
             fields[key].el.addEventListener('blur',  () => validateField(key));
             fields[key].el.addEventListener('input', () => {
@@ -180,20 +227,36 @@
             if (!valid) return;
 
             const btn = contactForm.querySelector('.form-btn');
-            btn.textContent = 'Sending...';
-            btn.disabled = true;
             formSuccess.classList.remove('show');
             formError.classList.remove('show');
 
-            fetch('https://formspree.io/f/fgforgivinggrace@gmail.com', {
+            const data = {
+                name:    document.getElementById('fname').value.trim(),
+                email:   document.getElementById('femail').value.trim(),
+                subject: document.getElementById('fsubject').value,
+                message: document.getElementById('fmessage').value.trim(),
+            };
+
+            // 엔드포인트 미설정 → 성공한 척하지 않고 메일 클라이언트로 넘긴다
+            if (!endpoint) {
+                const mail = 'mailto:' + (BIZ.email || '') +
+                    '?subject=' + encodeURIComponent('[Website] ' + (data.subject || 'Inquiry')) +
+                    '&body=' + encodeURIComponent(data.message + '\n\n— ' + data.name + ' (' + data.email + ')');
+                showContactError(
+                    'Our contact form is not connected yet. ' +
+                    '<a href="' + mail + '">Click here to email us directly</a>' +
+                    (BIZ.email ? ' (' + BIZ.email + ').' : '.')
+                );
+                return;
+            }
+
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+
+            fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify({
-                    name:    document.getElementById('fname').value.trim(),
-                    email:   document.getElementById('femail').value.trim(),
-                    subject: document.getElementById('fsubject').value,
-                    message: document.getElementById('fmessage').value.trim(),
-                }),
+                body: JSON.stringify(data),
             })
             .then(response => {
                 btn.textContent = 'Send Message';
@@ -201,18 +264,18 @@
                 if (response.ok) {
                     contactForm.reset();
                     formSuccess.classList.add('show');
-                    formSuccess.focus();
+                    track('generate_lead', { form: 'contact', topic: data.subject || 'other' });
                     setTimeout(() => formSuccess.classList.remove('show'), 6000);
                 } else {
-                    formError.classList.add('show');
-                    setTimeout(() => formError.classList.remove('show'), 6000);
+                    showContactError('Failed to send. Please email us at ' + (BIZ.email || '') + '.');
+                    setTimeout(() => formError.classList.remove('show'), 8000);
                 }
             })
             .catch(() => {
                 btn.textContent = 'Send Message';
                 btn.disabled = false;
-                formError.classList.add('show');
-                setTimeout(() => formError.classList.remove('show'), 6000);
+                showContactError('Failed to send. Please email us at ' + (BIZ.email || '') + '.');
+                setTimeout(() => formError.classList.remove('show'), 8000);
             });
         });
     }
@@ -224,64 +287,127 @@
     const modalClose    = document.getElementById('modalClose');
     const modalPreview  = document.getElementById('modalPreviewImg');
     const modalColorDis = document.getElementById('modalColorDisplay');
-    const modalColorList = document.getElementById('modalColorList');
-    const sizeSelector  = document.getElementById('sizeSelector');
     const orderForm     = document.getElementById('orderForm');
     const orderSuccess  = document.getElementById('orderSuccess');
     const orderDoneBtn  = document.getElementById('orderDoneBtn');
+    const payNowBtn     = document.getElementById('payNowBtn');
+    const submitBtn     = document.getElementById('orderSubmitBtn');
 
     let selectedSize    = '';
     let selectedColor   = 'white';
     let selectedQty     = 1;
     let selectedProduct = 'Forgiving Grace Tee';
+    let lastFocused     = null;
+
+    if (orderForm && FORMS.orderEndpoint) orderForm.setAttribute('action', FORMS.orderEndpoint);
+
+    /* ── 결제 설정 여부 ────────────────────────────────────── */
+    function paymentLinkFor(key) {
+        if (!PAY.provider || PAY.provider === 'none') return '';
+        const link = productMeta(key).paymentLink;
+        return /^https?:\/\//i.test(link) ? link : '';
+    }
+
+    /* ── 주문번호: FG-YYMMDD-XXXX ──────────────────────────── */
+    function makeOrderRef() {
+        const d  = new Date();
+        const p2 = n => String(n).padStart(2, '0');
+        const stamp = String(d.getFullYear()).slice(2) + p2(d.getMonth() + 1) + p2(d.getDate());
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let rand = '';
+        for (let i = 0; i < 4; i++) rand += chars[Math.floor(Math.random() * chars.length)];
+        return 'FG-' + stamp + '-' + rand;
+    }
+
+    /* ── 금액 계산 ─────────────────────────────────────────── */
+    function totals() {
+        const meta      = productMeta(selectedColor);
+        const itemTotal = meta.price * selectedQty;
+        const flat      = typeof PAY.shippingFlat === 'number' ? PAY.shippingFlat : 0;
+        const freeOver  = typeof PAY.freeShippingOver === 'number' ? PAY.freeShippingOver : Infinity;
+        const shipping  = itemTotal > 0 && itemTotal < freeOver ? flat : 0;
+        return { meta: meta, itemTotal: itemTotal, shipping: shipping, grand: itemTotal + shipping };
+    }
+
+    function updateSummary() {
+        const t   = totals();
+        const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+
+        set('summaryItemLabel', t.meta.productName + ' × ' + selectedQty);
+        set('summaryItemTotal', money(t.itemTotal));
+        set('summaryShipping',  t.shipping === 0 ? 'Free' : money(t.shipping));
+        set('summaryTotal',     money(t.grand));
+
+        const notes = [];
+        if (PAY.taxNote) notes.push(PAY.taxNote);
+        if (t.shipping > 0 && isFinite(PAY.freeShippingOver)) {
+            notes.push('Free shipping on orders over ' + money(PAY.freeShippingOver) + '.');
+        }
+        set('summaryNote', notes.join(' '));
+
+        if (submitBtn) {
+            submitBtn.textContent = paymentLinkFor(selectedColor)
+                ? 'Continue to Payment — ' + money(t.grand)
+                : 'Request This Order';
+        }
+
+        // 히든 필드(= JS 없이 제출될 때의 fallback)도 함께 갱신
+        const hid = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+        hid('hidProduct',   t.meta.productName);
+        hid('hidColor',     t.meta.colorName);
+        hid('hidSize',      selectedSize);
+        hid('hidQty',       selectedQty);
+        hid('hidSku',       t.meta.sku);
+        hid('hidUnitPrice', t.meta.price.toFixed(2));
+        hid('hidTotal',     t.grand.toFixed(2));
+    }
 
     function openModal(color, colorName, productName) {
-        selectedColor   = color || 'white';
+        selectedColor   = productImages[color] ? color : 'white';
         selectedSize    = '';
-        selectedProduct = productName || 'Forgiving Grace Tee';
+        const pics      = productMeta(selectedColor);
+        selectedProduct = productName || pics.productName;
 
-        const pics = productImages[selectedColor] || productImages.white;
-
-        // Preview image
         modalPreview.src = pics.front;
-        modalPreview.alt = `${selectedProduct} - ${pics.name}`;
+        modalPreview.alt = `${selectedProduct} - ${pics.colorName}`;
 
-        // Product title & color display
         document.getElementById('modalTitle').textContent = selectedProduct;
-        modalColorDis.textContent = pics.name;
+        modalColorDis.textContent = pics.colorName;
 
-        // Highlight color button
         document.querySelectorAll('.modal-color-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.color === selectedColor);
         });
-
-        // Reset size selection
         document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
 
-        // Reset quantity
         selectedQty = 1;
-        const qtyDisplay = document.getElementById('qtyDisplay');
-        if (qtyDisplay) qtyDisplay.textContent = '1';
+        const qtyDisplayEl = document.getElementById('qtyDisplay');
+        if (qtyDisplayEl) qtyDisplayEl.textContent = '1';
 
-        // Reset form fields
         orderForm.reset();
         clearOrderErrors();
+        updateSummary();
 
-        // Show form, hide success
         orderForm.style.display = '';
         orderSuccess.classList.remove('show');
 
-        // Open overlay
+        lastFocused = document.activeElement;
         modalOverlay.classList.add('open');
         modalOverlay.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
         modalClose.focus();
+
+        track('view_item', {
+            currency: PAY.currency || 'USD',
+            value:    pics.price,
+            items: [{ item_id: pics.sku, item_name: pics.productName, item_variant: pics.colorName, price: pics.price }],
+        });
     }
 
     function closeModal() {
         modalOverlay.classList.remove('open');
         modalOverlay.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        if (lastFocused && lastFocused.focus) lastFocused.focus();
     }
 
     // Open modal from product card click or "Order Now" button
@@ -307,13 +433,14 @@
     document.querySelectorAll('.modal-color-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             selectedColor = btn.dataset.color;
-            const pics = productImages[selectedColor] || productImages.white;
+            const pics = productMeta(selectedColor);
 
             document.querySelectorAll('.modal-color-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
             modalPreview.src = pics.front;
-            modalColorDis.textContent = pics.name;
+            modalColorDis.textContent = pics.colorName;
+            updateSummary();
         });
     });
 
@@ -327,12 +454,14 @@
             if (selectedQty > 1) {
                 selectedQty--;
                 qtyDisplay.textContent = selectedQty;
+                updateSummary();
             }
         });
         qtyPlus.addEventListener('click', () => {
             if (selectedQty < 10) {
                 selectedQty++;
                 qtyDisplay.textContent = selectedQty;
+                updateSummary();
             }
         });
     }
@@ -343,18 +472,19 @@
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             selectedSize = btn.dataset.size;
-            document.getElementById('sizeErr').textContent = '';
-            document.getElementById('sizeErr').classList.remove('show');
+            const err = document.getElementById('sizeErr');
+            if (err) { err.textContent = ''; err.classList.remove('show'); }
+            updateSummary();
         });
     });
 
-    /* ── Order form validation & submission ────────────────── */
+    /* ── Order form validation ─────────────────────────────── */
     function clearOrderErrors() {
         ['sizeErr','orderNameErr','orderEmailErr','orderAddrErr','orderCityErr','orderSubmitErr'].forEach(id => {
             const el = document.getElementById(id);
             if (el) { el.textContent = ''; el.classList.remove('show'); }
         });
-        ['orderName','orderEmail','orderAddr','orderCity'].forEach(id => {
+        ['orderName','orderEmail','orderAddr','orderCity','orderZip'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.borderColor = '';
         });
@@ -381,15 +511,106 @@
         const email = document.getElementById('orderEmail').value.trim();
         const addr  = document.getElementById('orderAddr').value.trim();
         const city  = document.getElementById('orderCity').value.trim();
+        const zip   = document.getElementById('orderZip').value.trim();
 
         if (name.length < 2)  { showOrderFieldError('orderNameErr',  'orderName',  'Please enter your full name.'); valid = false; }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showOrderFieldError('orderEmailErr', 'orderEmail', 'Please enter a valid email.'); valid = false; }
         if (addr.length < 5)  { showOrderFieldError('orderAddrErr',  'orderAddr',  'Please enter your street address.'); valid = false; }
         if (city.length < 2)  { showOrderFieldError('orderCityErr',  'orderCity',  'Please enter your city.'); valid = false; }
+        // 배송 라벨을 만들려면 ZIP 이 반드시 필요하다
+        if (!/^\d{5}(-\d{4})?$/.test(zip)) {
+            showOrderFieldError('orderSubmitErr', 'orderZip', 'Please enter a valid ZIP code (e.g. 90001).');
+            valid = false;
+        }
 
         return valid;
     }
 
+    /* ── 주문 전송 ─────────────────────────────────────────────
+       1) 일반 CORS 요청으로 보내고 응답을 확인한다 → 실패를 감지할 수 있다.
+          Content-Type 을 text/plain 으로 두면 preflight 없는 단순 요청이 되고,
+          Apps Script 는 e.postData.contents 로 JSON 을 그대로 받는다.
+       2) CORS 가 막히면 no-cors 로 한 번 더 보낸다. 전송은 되지만 결과를 읽을 수
+          없으므로 verified:false 로 표시해 고객에게 있는 그대로 안내한다.       */
+    function sendOrder(payload) {
+        const url = FORMS.orderEndpoint || '';
+        if (!url) return Promise.reject(new Error('order endpoint is not configured'));
+
+        const opts = {
+            method:  'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body:    JSON.stringify(payload),
+        };
+
+        return fetch(url, opts)
+            .then(res => {
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return { verified: true };
+            })
+            .catch(() => fetch(url, Object.assign({ mode: 'no-cors' }, opts))
+                .then(() => ({ verified: false })));
+    }
+
+    /* ── 결제 링크 URL 조립 ────────────────────────────────── */
+    function buildPaymentUrl(link, ref, email) {
+        try {
+            const u = new URL(link);
+            u.searchParams.set('client_reference_id', ref);
+            if (email) u.searchParams.set('prefilled_email', email);
+            return u.toString();
+        } catch (err) {
+            return link;
+        }
+    }
+
+    /* ── 접수 화면 ─────────────────────────────────────────── */
+    function showOrderReceived(ref, email, grand, verified) {
+        const link  = paymentLinkFor(selectedColor);
+        const title = document.getElementById('successTitle');
+        const msg   = document.getElementById('successMsg');
+        const fine  = document.getElementById('successFineprint');
+        document.getElementById('successRef').textContent = ref;
+
+        if (link) {
+            title.textContent = 'Almost There';
+            msg.textContent   = 'Your order is reserved. Complete payment to confirm it.';
+            payNowBtn.style.display = '';
+            payNowBtn.textContent   = 'Complete Payment — ' + money(grand);
+            payNowBtn.href          = buildPaymentUrl(link, ref, email);
+            payNowBtn.target        = '_blank';
+            fine.textContent = 'Payment is processed securely by Stripe. Your order is not confirmed until payment is completed.';
+        } else {
+            title.textContent = 'Order Received';
+            msg.textContent   = 'We have your order request. We will email a secure payment link to '
+                              + email + ' within 24 hours.';
+            payNowBtn.style.display = 'none';
+            fine.textContent = 'Your order is not confirmed until payment is completed. '
+                             + 'Please keep this reference number for any questions.';
+        }
+
+        if (!verified) {
+            fine.textContent += ' (We could not confirm delivery of your details — if you do not hear from us within 24 hours, email '
+                              + (BIZ.email || '') + ' with this reference number.)';
+        }
+
+        orderForm.style.display = 'none';
+        orderSuccess.classList.add('show');
+        orderDoneBtn.focus();
+    }
+
+    if (payNowBtn) {
+        payNowBtn.addEventListener('click', () => {
+            const t = totals();
+            track('add_payment_info', {
+                currency: PAY.currency || 'USD',
+                value:    t.grand,
+                items: [{ item_id: t.meta.sku, item_name: t.meta.productName,
+                          item_variant: t.meta.colorName, quantity: selectedQty }],
+            });
+        });
+    }
+
+    /* ── Submit ────────────────────────────────────────────── */
     if (orderForm) {
         orderForm.addEventListener('submit', e => {
             e.preventDefault();
@@ -397,55 +618,62 @@
 
             if (!validateOrderForm()) return;
 
-            const submitBtn = document.getElementById('orderSubmitBtn');
-            submitBtn.textContent = 'Placing Order...';
+            const t     = totals();
+            const ref   = makeOrderRef();
+            const email = document.getElementById('orderEmail').value.trim();
+            const refEl = document.getElementById('hidOrderRef');
+            if (refEl) refEl.value = ref;
+
+            const originalLabel = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
             submitBtn.disabled = true;
 
             const payload = {
-                timestamp:   new Date().toISOString(),
-                product:     `${selectedProduct} — Design # the Cross`,
-                color:       (productImages[selectedColor] || productImages.white).name,
-                size:        selectedSize,
-                quantity:    selectedQty,
-                name:        document.getElementById('orderName').value.trim(),
-                email:       document.getElementById('orderEmail').value.trim(),
-                phone:       document.getElementById('orderPhone').value.trim(),
-                address:     document.getElementById('orderAddr').value.trim(),
-                city:        document.getElementById('orderCity').value.trim(),
-                state:       document.getElementById('orderState').value.trim(),
-                zip:         document.getElementById('orderZip').value.trim(),
+                orderRef:      ref,
+                timestamp:     new Date().toISOString(),
+                product:       `${t.meta.productName} — Design # the Cross`,
+                sku:           t.meta.sku,
+                color:         t.meta.colorName,
+                size:          selectedSize,
+                quantity:      selectedQty,
+                unitPrice:     t.meta.price.toFixed(2),
+                shipping:      t.shipping.toFixed(2),
+                total:         t.grand.toFixed(2),
+                currency:      PAY.currency || 'USD',
+                paymentStatus: paymentLinkFor(selectedColor) ? 'awaiting_payment' : 'invoice_pending',
+                name:          document.getElementById('orderName').value.trim(),
+                email:         email,
+                phone:         document.getElementById('orderPhone').value.trim(),
+                address:       document.getElementById('orderAddr').value.trim(),
+                city:          document.getElementById('orderCity').value.trim(),
+                state:         document.getElementById('orderState').value.trim().toUpperCase(),
+                zip:           document.getElementById('orderZip').value.trim(),
             };
 
-            function showSuccess() {
-                orderForm.style.display = 'none';
-                orderSuccess.classList.add('show');
-                orderDoneBtn.focus();
-            }
-
-            function showOrderError() {
-                const errEl = document.getElementById('orderSubmitErr');
-                if (errEl) {
-                    errEl.textContent = 'An error occurred. Please try again.';
-                    errEl.classList.add('show');
-                }
-                submitBtn.textContent = 'Place Order';
-                submitBtn.disabled = false;
-            }
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode:   'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            })
-            .then(() => {
-                submitBtn.textContent = 'Place Order';
-                submitBtn.disabled = false;
-                showSuccess();
-            })
-            .catch(() => {
-                showOrderError();
+            track('begin_checkout', {
+                currency: payload.currency,
+                value:    t.grand,
+                items: [{ item_id: t.meta.sku, item_name: t.meta.productName,
+                          item_variant: t.meta.colorName, quantity: selectedQty, price: t.meta.price }],
             });
+
+            sendOrder(payload)
+                .then(result => {
+                    submitBtn.textContent = originalLabel;
+                    submitBtn.disabled = false;
+                    showOrderReceived(ref, email, t.grand, result.verified);
+                })
+                .catch(() => {
+                    submitBtn.textContent = originalLabel;
+                    submitBtn.disabled = false;
+                    const errEl = document.getElementById('orderSubmitErr');
+                    if (errEl) {
+                        errEl.innerHTML = 'We could not submit your order. Please email ' +
+                            '<a href="mailto:' + (BIZ.email || '') + '">' + (BIZ.email || '') + '</a> ' +
+                            'and we will take it from there.';
+                        errEl.classList.add('show');
+                    }
+                });
         });
     }
 

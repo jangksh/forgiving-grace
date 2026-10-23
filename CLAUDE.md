@@ -132,6 +132,34 @@
 
 ---
 
+## 실제 배포 중인 사이트 (정적 버전)
+
+WordPress 이전 단계로 **정적 HTML 사이트**를 먼저 운영합니다. WooCommerce 계획은 유효하지만
+현재 판매는 아래 구조로 이뤄집니다.
+
+```
+index.html            메인 · 주문 모달(사이즈/수량/배송지) = 결제 1단계
+privacy.html / returns.html / terms.html   정책 페이지
+assets/js/config.js   ★ 모든 설정의 단일 출처 (결제 링크·분석 ID·SNS·엔드포인트·가격)
+assets/js/main.js     UI + 주문 전송 + 결제 링크 연결
+assets/js/analytics.js GA4/Meta/TikTok 픽셀 + 쿠키 동의 배너
+assets/js/legal.js    정책 페이지에 사업자 정보 주입
+```
+
+주문 흐름: **주문 폼 → Google Apps Script(시트 기록, 주문번호 `FG-YYMMDD-XXXX` 발급) →
+Stripe Payment Link로 결제**. 결제 링크가 설정되지 않은 동안에는 "인보이스를 이메일로 보내드립니다"
+흐름으로 동작하며, 결제 완료 전까지는 어떤 화면에서도 "주문 확정"이라고 표시하지 않습니다.
+
+설정 방법과 론칭 전 체크리스트는 **SETUP.md** 참고.
+
+### 이 사이트를 고칠 때 지킬 것
+- 가격·배송비·SNS·분석 ID·결제 링크는 **config.js에서만** 수정 (HTML/JS에 하드코딩 금지)
+- 전송 결과를 확인하지 않고 성공 화면을 띄우지 말 것 (`mode:'no-cors'` 금지)
+- 링크를 `#`로 두지 말 것 — 값이 없으면 요소를 숨기는 쪽으로 처리
+- config.js는 공개 파일. **Secret Key 절대 금지**
+
+---
+
 ## 현재 진행 상태 (Status)
 
 | 항목 | 상태 |
@@ -142,7 +170,7 @@
 | WordPress 설치 | 🔄 진행 예정 |
 | WooCommerce 세팅 | 🔄 진행 예정 |
 | Printful 연동 | 🔄 진행 예정 |
-| 결제 시스템 | 🔄 진행 예정 |
+| 결제 시스템 | 🔄 Stripe Payment Link 연결 대기 (SETUP.md ①) |
 | 도메인 구매 | 🔄 진행 예정 |
 | SNS 계정 개설 | 🔄 진행 예정 |
 | 첫 제품 론칭 | ⏳ 목표 |

@@ -12,7 +12,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
 
+    <!-- Open Graph / social sharing -->
+    <meta property="og:type"        content="website">
+    <meta property="og:site_name"   content="Forgiving Grace">
+    <meta property="og:title"       content="Forgiving Grace | Christian Apparel">
+    <meta property="og:description" content="Wear your faith. Minimalist Christian apparel rooted in Genesis 1:28.">
+    <meta property="og:image"       content="assets/FG image.png">
+    <meta name="twitter:card"       content="summary_large_image">
+
+    <link rel="icon" href="assets/FG logo.png">
     <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- Site config must load before anything that reads it -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/analytics.js" defer></script>
 </head>
 <body>
 
@@ -330,7 +343,7 @@
                         </div>
 
                         <div class="contact-socials">
-                            <a href="#" class="social-row" aria-label="Instagram">
+                            <a href="https://www.instagram.com/forgivinggrace/" class="social-row" data-social="instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                                     <rect x="2" y="2" width="20" height="20" rx="5"/>
                                     <circle cx="12" cy="12" r="4"/>
@@ -338,23 +351,30 @@
                                 </svg>
                                 @forgivinggrace
                             </a>
-                            <a href="#" class="social-row" aria-label="TikTok">
+                            <a href="https://www.tiktok.com/@forgivinggrace" class="social-row" data-social="tiktok" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
                                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.54V6.78a4.85 4.85 0 01-1.02-.09z"/>
                                 </svg>
                                 @forgivinggrace
                             </a>
-                            <a href="#" class="social-row" aria-label="Pinterest">
+                            <a href="https://www.pinterest.com/forgivinggrace/" class="social-row" data-social="pinterest" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">
                                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M12 0C5.37 0 0 5.37 0 12c0 5.08 3.16 9.44 7.63 11.2-.1-.94-.2-2.38.04-3.4.22-.93 1.45-6.16 1.45-6.16s-.37-.74-.37-1.84c0-1.73.99-3.02 2.23-3.02 1.05 0 1.56.79 1.56 1.74 0 1.06-.68 2.65-1.03 4.12-.29 1.23.61 2.23 1.82 2.23 2.18 0 3.86-2.3 3.86-5.62 0-2.94-2.11-5-5.13-5-3.49 0-5.54 2.62-5.54 5.33 0 1.06.41 2.19.92 2.81.1.12.11.23.08.35-.09.39-.3 1.23-.34 1.4-.05.22-.17.27-.39.16-1.47-.69-2.39-2.85-2.39-4.59 0-3.73 2.71-7.16 7.82-7.16 4.1 0 7.29 2.93 7.29 6.83 0 4.08-2.57 7.35-6.13 7.35-1.2 0-2.33-.62-2.72-1.35l-.74 2.76c-.27 1.03-1 2.32-1.49 3.1.63.19 1.28.3 1.96.3 6.63 0 12-5.37 12-12S18.63 0 12 0z"/>
                                 </svg>
                                 @forgivinggrace
                             </a>
+                            <a href="mailto:fgforgivinggrace@gmail.com" class="social-row" data-social="email" aria-label="Email">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                                    <path d="m2 7 10 6 10-6"/>
+                                </svg>
+                                fgforgivinggrace@gmail.com
+                            </a>
                         </div>
                     </div>
 
                     <div class="contact-form-wrap fade-in">
-                        <form class="contact-form" id="contactForm" novalidate>
+                        <form class="contact-form" id="contactForm" method="post" action="" novalidate>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="fname">Name</label>
@@ -432,19 +452,19 @@
             </div>
 
             <div class="footer-social">
-                <a href="#" class="footer-social-btn" aria-label="Instagram">
+                <a href="https://www.instagram.com/forgivinggrace/" class="footer-social-btn" data-social="instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <rect x="2" y="2" width="20" height="20" rx="5"/>
                         <circle cx="12" cy="12" r="4"/>
                         <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
                     </svg>
                 </a>
-                <a href="#" class="footer-social-btn" aria-label="TikTok">
+                <a href="https://www.tiktok.com/@forgivinggrace" class="footer-social-btn" data-social="tiktok" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.54V6.78a4.85 4.85 0 01-1.02-.09z"/>
                     </svg>
                 </a>
-                <a href="#" class="footer-social-btn" aria-label="Pinterest">
+                <a href="https://www.pinterest.com/forgivinggrace/" class="footer-social-btn" data-social="pinterest" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 0C5.37 0 0 5.37 0 12c0 5.08 3.16 9.44 7.63 11.2-.1-.94-.2-2.38.04-3.4.22-.93 1.45-6.16 1.45-6.16s-.37-.74-.37-1.84c0-1.73.99-3.02 2.23-3.02 1.05 0 1.56.79 1.56 1.74 0 1.06-.68 2.65-1.03 4.12-.29 1.23.61 2.23 1.82 2.23 2.18 0 3.86-2.3 3.86-5.62 0-2.94-2.11-5-5.13-5-3.49 0-5.54 2.62-5.54 5.33 0 1.06.41 2.19.92 2.81.1.12.11.23.08.35-.09.39-.3 1.23-.34 1.4-.05.22-.17.27-.39.16-1.47-.69-2.39-2.85-2.39-4.59 0-3.73 2.71-7.16 7.82-7.16 4.1 0 7.29 2.93 7.29 6.83 0 4.08-2.57 7.35-6.13 7.35-1.2 0-2.33-.62-2.72-1.35l-.74 2.76c-.27 1.03-1 2.32-1.49 3.1.63.19 1.28.3 1.96.3 6.63 0 12-5.37 12-12S18.63 0 12 0z"/>
                     </svg>
@@ -452,11 +472,12 @@
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2024 Forgiving Grace. All rights reserved.</p>
+                <p>&copy; <span id="footerYear">2026</span> Forgiving Grace. All rights reserved.</p>
                 <div class="footer-legal">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Return Policy</a>
-                    <a href="#">Terms</a>
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="returns.html">Returns &amp; Shipping</a>
+                    <a href="terms.html">Terms of Service</a>
+                    <a href="mailto:fgforgivinggrace@gmail.com">Contact</a>
                 </div>
             </div>
         </div>
@@ -480,7 +501,17 @@
             </div>
 
             <!-- Order form -->
-            <form class="order-form" id="orderForm" novalidate>
+            <form class="order-form" id="orderForm" method="post" action="" novalidate>
+
+                <!-- Values mirrored from the pickers so a native POST carries them too -->
+                <input type="hidden" name="product"   id="hidProduct">
+                <input type="hidden" name="color"     id="hidColor">
+                <input type="hidden" name="size"      id="hidSize">
+                <input type="hidden" name="quantity"  id="hidQty" value="1">
+                <input type="hidden" name="sku"       id="hidSku">
+                <input type="hidden" name="unitPrice" id="hidUnitPrice">
+                <input type="hidden" name="total"     id="hidTotal">
+                <input type="hidden" name="orderRef"  id="hidOrderRef">
 
                 <div class="modal-section-label">Select Size &amp; Color</div>
 
@@ -514,55 +545,91 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="orderName">Name <span class="req-star">*</span></label>
-                        <input type="text" id="orderName" placeholder="Full name" autocomplete="name">
+                        <input type="text" id="orderName" name="name" placeholder="Full name" autocomplete="name">
                         <span class="field-error" id="orderNameErr"></span>
                     </div>
                     <div class="form-group">
                         <label for="orderEmail">Email <span class="req-star">*</span></label>
-                        <input type="email" id="orderEmail" placeholder="your@email.com" autocomplete="email">
+                        <input type="email" id="orderEmail" name="email" placeholder="your@email.com" autocomplete="email">
                         <span class="field-error" id="orderEmailErr"></span>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="orderPhone">Phone</label>
-                    <input type="tel" id="orderPhone" placeholder="(123) 456-7890" autocomplete="tel">
+                    <input type="tel" id="orderPhone" name="phone" placeholder="(123) 456-7890" autocomplete="tel">
                 </div>
 
                 <div class="form-group">
                     <label for="orderAddr">Street Address <span class="req-star">*</span></label>
-                    <input type="text" id="orderAddr" placeholder="123 Main Street, Apt 4" autocomplete="street-address">
+                    <input type="text" id="orderAddr" name="address" placeholder="123 Main Street, Apt 4" autocomplete="street-address">
                     <span class="field-error" id="orderAddrErr"></span>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="orderCity">City <span class="req-star">*</span></label>
-                        <input type="text" id="orderCity" placeholder="Los Angeles" autocomplete="address-level2">
+                        <input type="text" id="orderCity" name="city" placeholder="Los Angeles" autocomplete="address-level2">
                         <span class="field-error" id="orderCityErr"></span>
                     </div>
                     <div class="form-group">
                         <label for="orderState">State</label>
-                        <input type="text" id="orderState" placeholder="CA" maxlength="2" autocomplete="address-level1">
+                        <input type="text" id="orderState" name="state" placeholder="CA" maxlength="2" autocomplete="address-level1">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="orderZip">ZIP Code</label>
-                    <input type="text" id="orderZip" placeholder="90001" autocomplete="postal-code">
+                    <input type="text" id="orderZip" name="zip" placeholder="90001" autocomplete="postal-code">
+                </div>
+
+                <div class="order-summary" id="orderSummary">
+                    <div class="summary-row">
+                        <span id="summaryItemLabel">Item</span>
+                        <span id="summaryItemTotal">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span id="summaryShipping">—</span>
+                    </div>
+                    <div class="summary-row summary-total">
+                        <span>Total</span>
+                        <span id="summaryTotal">$0.00</span>
+                    </div>
+                    <p class="summary-note" id="summaryNote"></p>
                 </div>
 
                 <span class="field-error" id="orderSubmitErr" style="text-align:center; margin-top:4px;"></span>
                 <button type="submit" class="btn btn-primary btn-full" id="orderSubmitBtn">Place Order</button>
+
+                <p class="order-legal">
+                    By placing this order you agree to our
+                    <a href="terms.html" target="_blank" rel="noopener">Terms</a>,
+                    <a href="returns.html" target="_blank" rel="noopener">Returns &amp; Shipping Policy</a>, and
+                    <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.
+                </p>
+
+                <noscript>
+                    <p class="order-legal" style="color:#C0392B;">
+                        JavaScript is required to place an order here.
+                        Please email <a href="mailto:fgforgivinggrace@gmail.com">fgforgivinggrace@gmail.com</a>
+                        with the product, size and quantity you want and we will send you a payment link.
+                    </p>
+                </noscript>
             </form>
 
-            <!-- Success screen -->
+            <!-- Order received / payment step -->
             <div class="order-success" id="orderSuccess">
                 <img src="assets/FG logo.png" alt="Forgiving Grace" class="success-logo">
-                <h3>Order Placed!</h3>
-                <p>Your order has been placed successfully! We will contact you soon.</p>
+                <h3 id="successTitle">Order Received</h3>
+                <p class="success-ref">Order reference <strong id="successRef">—</strong></p>
+                <p id="successMsg">We have your order details. One more step to confirm it.</p>
+
+                <a class="btn btn-primary" id="payNowBtn" rel="noopener">Complete Payment</a>
+                <p class="success-fineprint" id="successFineprint"></p>
+
                 <p class="success-verse">"God Forgives You" — Genesis 1:28</p>
-                <button type="button" class="btn btn-primary" id="orderDoneBtn">Close</button>
+                <button type="button" class="btn btn-outline btn-dark-outline" id="orderDoneBtn">Close</button>
             </div>
         </div>
     </div>
